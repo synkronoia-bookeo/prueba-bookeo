@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bookeo · Crear mi álbum</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,700;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g:    #7db898;
+  --g2:   #5a9a7a;
+  --g3:   #e8f5ee;
+  --g4:   #f0faf5;
+  --dark: #1a1a2e;
+  --text: #2e2e3a;
+  --muted:#7a7a8a;
+  --border:#e2dfd8;
+  --cream:#faf8f3;
+  --gold: #c9a84c;
+  --white:#ffffff;
+  --shadow: 0 4px 24px rgba(0,0,0,0.07);
+  --shadow-md: 0 8px 40px rgba(0,0,0,0.11);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:var(--cream);
+  color:var(--text);
+  min-height:100vh;
+}
+
+/* ── NAV ── */
+nav{
+  background:var(--dark);
+  height:62px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 5%;
+  position:sticky;top:0;z-index:100;
+  border-bottom:1px solid var(--gold);
+}
+.logo{
+  font-family:'Lora',serif;
+  color:#f5e6c8;
+  font-size:1.3rem;
+  letter-spacing:.03em;
+}
+.logo em{color:var(--g);font-style:normal;}
+.nav-back{
+  display:flex;align-items:center;gap:6px;
+  color:rgba(255,255,255,0.5);
+  font-size:0.78rem;
+  text-decoration:none;
+  transition:color .2s;
+}
+.nav-back:hover{color:var(--g);}
+
+/* ── PROGRESS ── */
+.progress{
+  background:var(--dark);
+  padding:10px 5%;
+  display:flex;
+  align-items:center;
+  gap:0;
+  border-bottom:1px solid rgba(201,168,76,0.2);
+}
+.step{
+  display:flex;align-items:center;gap:7px;
+  font-size:0.73rem;color:rgba(255,255,255,0.3);
+  padding:0 14px;
+}
+.step.done{color:rgba(255,255,255,0.5);}
+.step.active{color:var(--g);}
+.step-dot{
+  width:20px;height:20px;border-radius:50%;
+  background:rgba(255,255,255,0.08);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.65rem;font-weight:700;
+}
+.step.active .step-dot{background:var(--g);color:var(--dark);}
+.step.done .step-dot{background:rgba(255,255,255,0.25);color:var(--dark);}
+.step-sep{color:rgba(255,255,255,0.12);font-size:0.9rem;padding:0 2px;}
+
+/* ── MAIN ── */
+main{
+  max-width:680px;
+  margin:0 auto;
+  padding:40px 20px 100px;
+}
+
+h1{
+  font-family:'Lora',serif;
+  font-size:1.6rem;
+  color:var(--dark);
+  margin-bottom:6px;
+  line-height:1.25;
+}
+h1 em{font-style:italic;color:var(--g2);}
+.page-sub{
+  color:var(--muted);font-size:0.85rem;
+  margin-bottom:36px;line-height:1.6;
+}
+
+/* ── SECTION CARD ── */
+.card{
+  background:var(--white);
+  border-radius:18px;
+  padding:24px 26px;
+  margin-bottom:16px;
+  border:1.5px solid var(--border);
+  box-shadow:var(--shadow);
+  transition:border-color .25s;
+}
+.card:focus-within{border-color:var(--g);}
+
+.section-label{
+  font-size:0.68rem;
+  font-weight:700;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:14px;
+  display:flex;align-items:center;gap:7px;
+}
+.section-label::before{
+  content:'';width:3px;height:12px;
+  background:var(--g);border-radius:2px;
+}
+
+/* ── FORMAT SELECTOR ── */
+.format-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-bottom:0;
+}
+.format-btn{
+  border:1.5px solid var(--border);
+  border-radius:12px;
+  padding:14px 10px;
+  text-align:center;
+  cursor:pointer;
+  transition:all .22s;
+  background:var(--white);
+  position:relative;
+}
+.format-btn:hover{border-color:var(--g);background:var(--g4);}
+.format-btn.selected{
+  border-color:var(--g);
+  background:var(--g3);
+  box-shadow:0 0 0 3px rgba(125,184,152,0.18);
+}
+.format-btn.selected::after{
+  content:'✓';
+  position:absolute;top:7px;right:9px;
+  font-size:0.7rem;font-weight:800;
+  color:var(--g2);
+}
+.format-icon{
+  font-size:1.6rem;margin-bottom:6px;
+  display:block;
+}
+.format-name{
+  font-size:0.82rem;font-weight:700;
+  color:var(--text);display:block;
+}
+.format-desc{
+  font-size:0.68rem;color:var(--muted);
+  margin-top:2px;display:block;
+}
+
+/* Orientación — solo 21x28 */
+.orientation-row{
+  display:none;
+  gap:10px;
+  margin-top:12px;
+  animation:fadeUp .3s ease both;
+}
+.orientation-row.show{display:flex;}
+.ori-btn{
+  flex:1;padding:10px;border-radius:10px;
+  border:1.5px solid var(--border);
+  background:var(--white);cursor:pointer;
+  font-size:0.8rem;font-weight:600;
+  color:var(--muted);
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  transition:all .2s;
+  font-family:'Plus Jakarta Sans',sans-serif;
+}
+.ori-btn:hover{border-color:var(--g);color:var(--g2);}
+.ori-btn.selected{
+  border-color:var(--g);
+  background:var(--g3);
+  color:var(--g2);font-weight:700;
+}
+
+/* ── DRIVE ── */
+.drive-row{
+  display:flex;align-items:flex-start;gap:16px;
+  flex-wrap:wrap;
+}
+.drive-cta{
+  display:inline-flex;align-items:center;gap:9px;
+  background:var(--white);
+  border:1.5px solid var(--border);
+  border-radius:50px;
+  padding:11px 20px;
+  font-size:0.85rem;font-weight:600;
+  cursor:pointer;
+  transition:all .25s;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  white-space:nowrap;
+  color:var(--text);
+}
+.drive-cta:hover{border-color:var(--g);box-shadow:0 0 0 3px rgba(125,184,152,0.15);}
+.drive-cta.connected{
+  background:var(--g3);border-color:var(--g);color:var(--g2);
+}
+.drive-info{flex:1;min-width:200px;}
+.drive-info p{font-size:0.78rem;color:var(--muted);line-height:1.55;}
+.drive-note{
+  font-size:0.7rem;color:var(--muted);
+  margin-top:10px;
+  background:var(--g4);
+  border-radius:8px;padding:8px 12px;
+  line-height:1.55;
+}
+.drive-note strong{color:var(--text);}
+.drive-status{
+  display:none;margin-top:10px;
+  align-items:center;gap:7px;
+  font-size:0.78rem;color:var(--g2);font-weight:600;
+  background:var(--g3);border-radius:8px;padding:9px 12px;
+}
+.drive-status.show{display:flex;}
+.pulse{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--g);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.4);}}
+
+/* ── UPLOAD ZONE ── */
+.upload-zone{
+  border:2px dashed var(--border);
+  border-radius:14px;
+  padding:36px 20px;
+  text-align:center;
+  cursor:pointer;
+  transition:all .3s;
+  position:relative;
+  background:#fdfcf9;
+}
+.upload-zone:hover{border-color:var(--g);background:var(--g4);}
+.upload-zone.loaded{border-style:solid;border-color:var(--g);background:var(--g4);}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.upload-icon-wrap{
+  width:60px;height:60px;margin:0 auto 14px;
+  background:var(--g3);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .25s;
+}
+.upload-zone:hover .upload-icon-wrap{transform:scale(1.06);}
+.upload-zone h3{font-size:0.95rem;color:var(--dark);margin-bottom:5px;}
+.upload-zone p{font-size:0.78rem;color:var(--muted);line-height:1.55;}
+.type-pills{
+  display:flex;flex-wrap:wrap;justify-content:center;
+  gap:6px;margin-top:12px;
+}
+.pill{
+  background:rgba(125,184,152,0.12);
+  color:var(--g2);border-radius:20px;
+  padding:3px 10px;font-size:0.68rem;font-weight:600;
+}
+.file-count{
+  display:none;margin-top:14px;
+  background:var(--dark);color:white;
+  border-radius:8px;padding:10px 14px;
+  font-size:0.8rem;line-height:1.5;
+}
+.file-count.show{display:block;}
+.file-count strong{color:var(--g);}
+
+/* ── TITLE FIELD ── */
+.title-field{
+  width:100%;
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  padding:12px 14px;
+  font-size:0.92rem;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  color:var(--text);
+  background:var(--white);
+  outline:none;
+  transition:border-color .2s;
+}
+.title-field:focus{border-color:var(--g);}
+.title-hint{
+  display:flex;justify-content:space-between;
+  margin-top:6px;
+  font-size:0.7rem;color:var(--muted);
+}
+.title-note{
+  font-size:0.72rem;color:var(--muted);
+  margin-top:8px;
+  display:flex;align-items:flex-start;gap:5px;
+  line-height:1.5;
+}
+.title-note::before{content:'📚';font-size:0.85rem;}
+
+/* ── VIDEO MERGE BTN ── */
+.video-merge-btn{
+  width:100%;
+  padding:15px 20px;
+  border-radius:14px;
+  border:1.5px dashed var(--border);
+  background:var(--white);
+  cursor:pointer;
+  transition:all .25s;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  display:flex;align-items:center;gap:14px;
+  text-align:left;
+}
+.video-merge-btn:hover{
+  border-color:var(--g);
+  background:var(--g4);
+  border-style:solid;
+}
+.vmb-icon{
+  width:44px;height:44px;min-width:44px;
+  background:var(--g3);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;
+  transition:transform .2s;
+}
+.video-merge-btn:hover .vmb-icon{transform:scale(1.08);}
+.vmb-text h4{font-size:0.9rem;color:var(--dark);margin-bottom:2px;}
+.vmb-text p{font-size:0.75rem;color:var(--muted);line-height:1.45;}
+.vmb-arrow{
+  margin-left:auto;
+  color:var(--muted);font-size:1.1rem;
+  transition:transform .2s;
+}
+.video-merge-btn:hover .vmb-arrow{transform:translateX(3px);color:var(--g2);}
+
+/* ── GENERATE BTN ── */
+.generate-wrap{
+  margin-top:28px;
+  text-align:center;
+}
+.generate-btn{
+  width:100%;
+  padding:18px 30px;
+  background:var(--g);
+  color:white;border:none;
+  border-radius:50px;
+  font-size:1.05rem;font-weight:700;
+  cursor:pointer;
+  transition:all .3s;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:0 6px 24px rgba(125,184,152,0.4);
+  letter-spacing:.01em;
+}
+.generate-btn:hover{
+  background:var(--g2);
+  transform:translateY(-2px);
+  box-shadow:0 10px 32px rgba(125,184,152,0.45);
+}
+.generate-btn:disabled{
+  opacity:.45;cursor:not-allowed;
+  transform:none;box-shadow:none;
+}
+.generate-note{
+  font-size:0.73rem;color:var(--muted);
+  margin-top:10px;line-height:1.5;
+}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:28px;left:50%;
+  transform:translateX(-50%) translateY(60px);
+  background:var(--dark);color:white;
+  border:1px solid var(--g);
+  border-radius:50px;
+  padding:11px 22px;font-size:0.82rem;
+  transition:transform .35s cubic-bezier(.175,.885,.32,1.275);
+  z-index:200;white-space:nowrap;
+}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(14px);}
+  to{opacity:1;transform:none;}
+}
+main > *{animation:fadeUp .5s ease both;}
+main > *:nth-child(1){animation-delay:.05s;}
+main > *:nth-child(2){animation-delay:.1s;}
+main > *:nth-child(3){animation-delay:.15s;}
+main > *:nth-child(4){animation-delay:.2s;}
+main > *:nth-child(5){animation-delay:.25s;}
+main > *:nth-child(6){animation-delay:.3s;}
+main > *:nth-child(7){animation-delay:.35s;}
+
+@media(max-width:560px){
+  main{padding:28px 14px 80px;}
+  h1{font-size:1.3rem;}
+  .format-icon{font-size:1.3rem;}
+  .progress .step span{display:none;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Book<em>eo</em></div>
+  <a href="#" class="nav-back">← Volver a inicio</a>
+</nav>
+
+<div class="progress">
+  <div class="step done"><div class="step-dot">✓</div><span>Inicio</span></div>
+  <div class="step-sep">›</div>
+  <div class="step active"><div class="step-dot">2</div><span>Crear álbum</span></div>
+  <div class="step-sep">›</div>
+  <div class="step"><div class="step-dot">3</div><span>Revisar</span></div>
+  <div class="step-sep">›</div>
+  <div class="step"><div class="step-dot">4</div><span>Pagar</span></div>
+</div>
+
+<main>
+
+  <h1>Crea tu <em>álbum de fotos</em></h1>
+  <p class="page-sub">Sube tus fotos y vídeos · la IA diseña el libro en ~4 minutos · tú solo apruebas</p>
+
+  <!-- 1. FORMATO -->
+  <div class="card">
+    <div class="section-label">1 · Formato del álbum</div>
+
+    <div class="format-grid">
+      <div class="format-btn" id="fmt-2121" onclick="selectFormat('2121')">
+        <span class="format-icon">📗</span>
+        <span class="format-name">21 × 21</span>
+        <span class="format-desc">Cuadrado · 26,90€</span>
+      </div>
+      <div class="format-btn selected" id="fmt-2128" onclick="selectFormat('2128')">
+        <span class="format-icon">📘</span>
+        <span class="format-name">21 × 28</span>
+        <span class="format-desc">Rectangular · 32,60€</span>
+      </div>
+      <div class="format-btn" id="fmt-2828" onclick="selectFormat('2828')">
+        <span class="format-icon">📕</span>
+        <span class="format-name">28 × 28</span>
+        <span class="format-desc">Grande · 46,50€</span>
+      </div>
+    </div>
+
+    <!-- Orientación — solo visible para 21x28 -->
+    <div class="orientation-row show" id="oriRow">
+      <button class="ori-btn selected" id="ori-v" onclick="selectOri('v')">
+        <span>📱</span> Vertical
+      </button>
+      <button class="ori-btn" id="ori-h" onclick="selectOri('h')">
+        <span>🖼</span> Horizontal
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. GOOGLE DRIVE -->
+  <div class="card">
+    <div class="section-label">2 · Conecta tu Google Drive</div>
+    <div class="drive-row">
+      <button class="drive-cta" id="driveBtn" onclick="connectDrive()">
+        <svg width="18" height="18" viewBox="0 0 24 24">
+          <path d="M4.433 22l-2.433-4.231 7.637-13.238 2.433 4.231L4.433 22z" fill="#0066DA"/>
+          <path d="M15.567 22H4.433l2.433-4H18l-2.433 4z" fill="#00AC47"/>
+          <path d="M18 18H6.866L14.363 4.769 21.567 18H18z" fill="#EA4335"/>
+        </svg>
+        Conectar Google Drive
+      </button>
+      <div class="drive-info">
+        <p>Tus vídeos se guardarán en tu Drive en una carpeta llamada <strong>Mibookeo</strong>.</p>
+        <div class="drive-note">
+          * <strong>Solo creamos la carpeta Mibookeo.</strong> No tenemos acceso a ningún otro archivo ni carpeta de tu Google Drive.
+        </div>
+      </div>
+    </div>
+    <div class="drive-status" id="driveStatus">
+      <div class="pulse"></div>
+      <span>Drive conectado · <strong id="driveEmail">usuario@gmail.com</strong> · carpeta Mibookeo lista ✓</span>
+    </div>
+  </div>
+
+  <!-- 3. SUBIR FOTOS Y VÍDEOS -->
+  <div class="card">
+    <div class="section-label">3 · Sube tus fotos y vídeos</div>
+    <div class="upload-zone" id="uploadZone" onclick="simulateUpload()">
+      <input type="file" multiple accept="image/*,video/*" style="pointer-events:none">
+      <div class="upload-icon-wrap">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#7db898" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <h3 id="uploadTitle">Arrastra aquí o toca para seleccionar</h3>
+      <p id="uploadDesc">Selecciona fotos y vídeos a la vez · el sistema los separa automáticamente</p>
+      <div class="type-pills">
+        <span class="pill">📷 JPG</span>
+        <span class="pill">📷 PNG</span>
+        <span class="pill">📷 HEIC</span>
+        <span class="pill">🎬 MP4</span>
+        <span class="pill">🎬 MOV</span>
+      </div>
+    </div>
+    <div class="file-count" id="fileCount">
+      <strong id="photoCount">0 fotos</strong> ordenadas por fecha EXIF ·
+      <strong id="videoCount">0 vídeos</strong> → se subirán a tu Drive automáticamente
+    </div>
+  </div>
+
+  <!-- 4. TÍTULO DEL ÁLBUM -->
+  <div class="card">
+    <div class="section-label">4 · Título de tu álbum</div>
+    <input
+      type="text"
+      class="title-field"
+      id="titleField"
+      placeholder="Ej: Verano en familia 2024"
+      maxlength="30"
+      oninput="updateCount()"
+    >
+    <div class="title-hint">
+      <span>Aparecerá en la portada del libro</span>
+      <span id="charCount">0 / 30</span>
+    </div>
+    <div class="title-note">
+      Este título también se usará en el lomo del libro para que puedas identificarlo en la estantería.
+    </div>
+  </div>
+
+  <!-- 5. UNIR VÍDEOS -->
+  <div class="card">
+    <div class="section-label">5 · Unir vídeos <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(opcional)</span></div>
+
+    <!-- ======================================================== -->
+    <!-- DESARROLLADOR: Cambia el href por la URL o archivo HTML  -->
+    <!-- de tu página unificadora de vídeos                        -->
+    <!-- Ejemplo: href="bookeo_unir_videos.html"                  -->
+    <!--          href="https://mibookeo.es/unir-videos"          -->
+    <!-- ======================================================== -->
+    <a href="unir-videos-prueba.html" style="text-decoration:none;">
+      <div class="video-merge-btn">
+        <div class="vmb-icon">🎬</div>
+        <div class="vmb-text">
+          <h4>Crear vídeo para descargar</h4>
+          <p>Une tus clips en un solo vídeo · añade música · descárgalo y súbelo junto con tus fotos</p>
+        </div>
+        <span class="vmb-arrow">›</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- 6. GENERAR -->
+  <div class="generate-wrap">
+    <button class="generate-btn" id="generateBtn" disabled onclick="generate()">
+      <span>✦</span>
+      Generar mi álbum con IA
+    </button>
+    <p class="generate-note">
+      ~4 minutos · sin descargar nada · solo pagas si te gusta
+    </p>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── ESTADO ──
+let selectedFormat = '2128';
+let selectedOri    = 'v';
+let driveConnected = false;
+let filesLoaded    = false;
+
+// ── FORMATO ──
+function selectFormat(fmt) {
+  ['2121','2128','2828'].forEach(f => {
+    document.getElementById(`fmt-${f}`).classList.toggle('selected', f === fmt);
+  });
+  selectedFormat = fmt;
+  const oriRow = document.getElementById('oriRow');
+  oriRow.classList.toggle('show', fmt === '2128');
+  checkReady();
+}
+
+// ── ORIENTACIÓN ──
+function selectOri(ori) {
+  selectedOri = ori;
+  document.getElementById('ori-v').classList.toggle('selected', ori === 'v');
+  document.getElementById('ori-h').classList.toggle('selected', ori === 'h');
+}
+
+// ── DRIVE ──
+function connectDrive() {
+  const btn = document.getElementById('driveBtn');
+  btn.textContent = '⏳ Conectando...';
+  btn.disabled = true;
+  setTimeout(() => {
+    driveConnected = true;
+    btn.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24">
+        <path d="M4.433 22l-2.433-4.231 7.637-13.238 2.433 4.231L4.433 22z" fill="#0066DA"/>
+        <path d="M15.567 22H4.433l2.433-4H18l-2.433 4z" fill="#00AC47"/>
+        <path d="M18 18H6.866L14.363 4.769 21.567 18H18z" fill="#EA4335"/>
+      </svg>
+      ✓ Conectado`;
+    btn.classList.add('connected');
+    btn.disabled = false;
+    document.getElementById('driveStatus').classList.add('show');
+    toast('✅ Google Drive conectado · carpeta Mibookeo creada');
+    checkReady();
+  }, 1400);
+}
+
+// ── UPLOAD ──
+function simulateUpload() {
+  if (filesLoaded) return;
+  filesLoaded = true;
+  const zone = document.getElementById('uploadZone');
+  zone.classList.add('loaded');
+  document.getElementById('uploadTitle').textContent = '✅ 24 archivos cargados';
+  document.getElementById('uploadDesc').textContent = '21 fotos ordenadas por fecha · 3 vídeos detectados';
+
+  const fc = document.getElementById('fileCount');
+  document.getElementById('photoCount').textContent = '21 fotos';
+  document.getElementById('videoCount').textContent = '3 vídeos';
+  fc.classList.add('show');
+
+  toast('📷 21 fotos · 🎬 3 vídeos · todo listo');
+  checkReady();
+}
+
+// ── TÍTULO ──
+function updateCount() {
+  const v = document.getElementById('titleField').value.length;
+  document.getElementById('charCount').textContent = `${v} / 30`;
+  checkReady();
+}
+
+// ── READY CHECK ──
+function checkReady() {
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = !filesLoaded;
+}
+
+// ── GENERATE ──
+function generate() {
+  const btn = document.getElementById('generateBtn');
+  const title = document.getElementById('titleField').value || 'Mi Álbum';
+  btn.innerHTML = '<span>⏳</span> Generando tu álbum...';
+  btn.disabled = true;
+  toast(`✨ Creando "${title}" · ~4 minutos`);
+  // Aquí se llamaría al backend
+}
+
+// ── TOAST ──
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
