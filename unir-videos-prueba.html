@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bookeo · Unir Vídeos</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #7db898;
+    --green-dark: #5a9478;
+    --green-light: #e8f4ed;
+    --green-pale: #f4faf6;
+    --text: #2a2a2a;
+    --text-muted: #7a7a7a;
+    --white: #ffffff;
+    --radius: 14px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--green-pale);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── PAGE LAYOUT ── */
+  .page-wrap {
+    width: 100%; max-width: 680px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 0;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .modal-header {
+    background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+    padding: 18px 26px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .modal-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: white; }
+  .modal-logo span {
+    background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 20px;
+    font-size: 0.68rem; font-family: 'DM Sans', sans-serif; font-weight: 500;
+    letter-spacing: 0.5px; text-transform: uppercase; vertical-align: middle; margin-left: 6px;
+  }
+  .modal-subtitle { color: rgba(255,255,255,0.8); font-size: 0.83rem; margin-top: 3px; }
+  .btn-close {
+    background: rgba(255,255,255,0.2); border: none; color: white;
+    width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; transition: background 0.2s; flex-shrink: 0;
+  }
+  .btn-close:hover { background: rgba(255,255,255,0.35); }
+
+  /* ── BODY ── */
+  .modal-body { padding: 26px 30px 30px; }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-size: 0.73rem; font-weight: 500; letter-spacing: 1.1px;
+    text-transform: uppercase; color: var(--green-dark);
+    margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::after { content:''; flex:1; height:1px; background: var(--green-light); }
+
+  /* ── VIDEO SLOTS ── */
+  .video-slots { display: flex; flex-direction: column; gap: 9px; margin-bottom: 26px; }
+  .slot {
+    border: 1.5px dashed #c8ddd2; border-radius: var(--radius);
+    padding: 13px 16px; display: flex; align-items: center; gap: 13px;
+    cursor: pointer; transition: all 0.22s ease;
+    background: var(--green-pale); position: relative;
+  }
+  .slot:hover { border-color: var(--green); background: var(--green-light); }
+  .slot.has-file { border-style: solid; border-color: var(--green); background: white; }
+  .slot input[type="file"] { position: absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+  .slot-number {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--green-light); color: var(--green-dark);
+    font-weight: 600; font-size: 0.82rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.22s;
+  }
+  .slot.has-file .slot-number { background: var(--green); color: white; }
+  .slot-content { flex:1; min-width:0; }
+  .slot-title { font-size: 0.88rem; font-weight: 500; }
+  .slot-subtitle { font-size: 0.76rem; color: var(--text-muted); margin-top: 2px; }
+  .slot-icon { color: var(--text-muted); flex-shrink:0; transition: color 0.22s; }
+  .slot:hover .slot-icon { color: var(--green); }
+  .slot.has-file .slot-icon { display: none; }
+  .slot-check { color: var(--green); flex-shrink:0; display:none; }
+  .slot.has-file .slot-check { display: block; }
+
+  /* ── MUSIC SECTION ── */
+  .music-section { margin-bottom: 26px; }
+
+  /* ── Bloque de subir audio propio ── */
+  .music-own-block {
+    background: var(--green-pale);
+    border: 1.5px dashed #c8ddd2;
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+  .music-own-label {
+    font-size: 0.82rem; font-weight: 600;
+    color: var(--text); margin-bottom: 4px;
+  }
+  .music-own-hint {
+    font-size: 0.76rem; color: var(--text-muted); margin-bottom: 12px;
+  }
+  .music-own-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: white; border: 1.5px solid #c8ddd2;
+    border-radius: 8px; padding: 10px 16px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.86rem; font-weight: 500;
+    color: var(--green-dark); cursor: pointer;
+    transition: all 0.2s; position: relative; overflow: hidden;
+  }
+  .music-own-btn:hover { border-color: var(--green); background: var(--green-light); }
+  .music-own-btn.has-file { border-color: var(--green); background: var(--green-light); color: var(--green-dark); }
+  .music-own-btn input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .music-own-filename {
+    font-size: 0.76rem; color: var(--green-dark);
+    margin-top: 8px; display: none; font-weight: 500;
+  }
+  .music-own-filename.visible { display: block; }
+
+  /* ── Separador ── */
+  .music-or-sep {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+  }
+  .music-or-sep::before, .music-or-sep::after {
+    content: ''; flex: 1; height: 1px; background: #e4e4e4;
+  }
+  .music-or-sep span {
+    font-size: 0.73rem; color: #aaa; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.8px;
+  }
+
+  /* ── Opciones clicables ── */
+  .music-choice-group { display: flex; flex-direction: column; gap: 10px; }
+
+  .music-choice {
+    border: 1.5px solid #e4e4e4; border-radius: var(--radius);
+    background: white; cursor: pointer; transition: all 0.22s;
+    overflow: hidden;
+  }
+  .music-choice:hover { border-color: var(--green); }
+  .music-choice.selected { border-color: var(--green); }
+
+  .music-choice-header {
+    display: flex; align-items: center; gap: 13px;
+    padding: 14px 16px;
+  }
+  .music-choice.selected .music-choice-header { background: var(--green-light); }
+
+  .mradio {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid #ccc; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .music-choice.selected .mradio { border-color: var(--green); background: var(--green); }
+  .mradio-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: white;
+    opacity: 0; transform: scale(0); transition: all 0.2s;
+  }
+  .music-choice.selected .mradio-dot { opacity: 1; transform: scale(1); }
+
+  .music-choice-texts { flex: 1; }
+  .music-choice-title { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+  .music-choice-desc  { font-size: 0.76rem; color: var(--text-muted); margin-top: 2px; }
+
+  /* ── Lista de géneros (dentro del bloque música automática) ── */
+  .genre-panel {
+    display: none; border-top: 1px solid var(--green-light);
+    padding: 16px 16px 14px; background: white;
+    animation: fadeIn 0.2s ease;
+  }
+  .genre-panel.visible { display: block; }
+  .genre-panel-label {
+    font-size: 0.73rem; font-weight: 600; color: var(--green-dark);
+    text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px;
+  }
+  .genre-group { margin-bottom: 12px; }
+  .genre-group-title {
+    font-size: 0.7rem; color: #bbb; text-transform: uppercase;
+    letter-spacing: 0.7px; font-weight: 500; margin-bottom: 6px;
+  }
+  .genre-list { display: flex; flex-direction: column; gap: 4px; }
+  .genre-item {
+    padding: 9px 12px; border-radius: 8px;
+    font-size: 0.875rem; color: var(--text);
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .genre-item:hover { background: var(--green-pale); color: var(--green-dark); }
+  .genre-item.selected { background: var(--green-light); color: var(--green-dark); font-weight: 600; }
+  .genre-item-check { color: var(--green); display: none; }
+  .genre-item.selected .genre-item-check { display: block; }
+
+  /* ── INFO BOX ── */
+  .info-box {
+    background: var(--green-pale); border: 1px solid var(--green-light);
+    border-radius: 12px; padding: 12px 14px;
+    font-size: 0.8rem; color: var(--text-muted);
+    display: flex; gap: 9px; align-items: flex-start; margin-bottom: 22px;
+  }
+  .info-box svg { flex-shrink:0; color: var(--green); margin-top: 1px; }
+
+  /* ── PROGRESS ── */
+  .progress-area { display: none; margin-bottom: 20px; }
+  .progress-area.visible { display: block; }
+  .progress-bar-track { background: var(--green-light); border-radius: 10px; height: 8px; overflow: hidden; margin-bottom: 8px; }
+  .progress-bar-fill {
+    height: 100%; background: linear-gradient(90deg, var(--green) 0%, var(--green-dark) 100%);
+    border-radius: 10px; width: 0%; transition: width 0.5s ease;
+  }
+  .progress-text { font-size: 0.82rem; color: var(--text-muted); text-align: center; }
+
+  /* ── RESULT ── */
+  .result-area { display: none; text-align: center; padding: 16px 0 4px; }
+  .result-area.visible { display: block; }
+  .result-icon {
+    width: 60px; height: 60px; background: var(--green-light);
+    border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; margin: 0 auto 14px;
+  }
+  .result-title { font-family: 'Playfair Display', serif; font-size: 1.35rem; margin-bottom: 6px; }
+  .result-subtitle { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 22px; }
+  .btn-download {
+    background: var(--green); color: white; border: none;
+    padding: 15px 38px; border-radius: 50px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.97rem; font-weight: 500;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 10px;
+    transition: all 0.3s; box-shadow: 0 4px 20px rgba(125,184,152,0.4); text-decoration: none;
+  }
+  .btn-download:hover { background: var(--green-dark); transform: translateY(-2px); }
+  .btn-new {
+    display: block; margin: 12px auto 0;
+    background: none; border: none; color: var(--green-dark);
+    font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+    cursor: pointer; text-decoration: underline;
+  }
+
+  /* ── ACTIONS ── */
+  .modal-actions { display: flex; gap: 11px; align-items: center; }
+  .btn-primary {
+    flex: 1; background: var(--green); color: white; border: none;
+    padding: 15px; border-radius: 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.97rem; font-weight: 500;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 9px;
+    transition: all 0.3s; box-shadow: 0 4px 16px rgba(125,184,152,0.35);
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--green-dark); transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+  .btn-secondary {
+    background: transparent; color: var(--text-muted);
+    border: 1.5px solid #e0e0e0; padding: 15px 20px; border-radius: 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--green); color: var(--green-dark); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 540px) {
+    .modal-header { padding: 14px 18px; }
+    .modal-body { padding: 16px 18px 28px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- EDITOR DE VÍDEOS — PÁGINA COMPLETA -->
+<div class="page-wrap" id="modal">
+
+    <!-- HEADER -->
+    <div class="modal-header">
+      <div>
+        <div class="modal-logo">bookeo <span>vídeos</span></div>
+        <div class="modal-subtitle">Une hasta 5 vídeos · elige tu música</div>
+      </div>
+      <a href="bookeo_creador.html" class="btn-close" style="text-decoration:none;">← Volver</a>
+    </div>
+
+    <!-- BODY -->
+    <div class="modal-body">
+
+      <!-- VÍDEOS -->
+      <div class="section-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        Tus vídeos · en el orden que quieras
+      </div>
+
+      <div class="video-slots">
+        <div class="slot" id="slot-1">
+          <input type="file" id="file-1" accept="video/*" onchange="handleVideoFile(1,event)">
+          <div class="slot-number">1</div>
+          <div class="slot-content">
+            <div class="slot-title" id="slot-title-1">Vídeo 1 · primer clip</div>
+            <div class="slot-subtitle" id="slot-sub-1">Toca para seleccionar</div>
+          </div>
+          <svg class="slot-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <svg class="slot-check" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="slot" id="slot-2">
+          <input type="file" id="file-2" accept="video/*" onchange="handleVideoFile(2,event)">
+          <div class="slot-number">2</div>
+          <div class="slot-content">
+            <div class="slot-title" id="slot-title-2">Vídeo 2</div>
+            <div class="slot-subtitle" id="slot-sub-2">Toca para seleccionar</div>
+          </div>
+          <svg class="slot-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <svg class="slot-check" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="slot" id="slot-3">
+          <input type="file" id="file-3" accept="video/*" onchange="handleVideoFile(3,event)">
+          <div class="slot-number">3</div>
+          <div class="slot-content">
+            <div class="slot-title" id="slot-title-3">Vídeo 3</div>
+            <div class="slot-subtitle" id="slot-sub-3">Toca para seleccionar</div>
+          </div>
+          <svg class="slot-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <svg class="slot-check" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="slot" id="slot-4">
+          <input type="file" id="file-4" accept="video/*" onchange="handleVideoFile(4,event)">
+          <div class="slot-number">4</div>
+          <div class="slot-content">
+            <div class="slot-title" id="slot-title-4">Vídeo 4 · opcional</div>
+            <div class="slot-subtitle" id="slot-sub-4">Toca para seleccionar</div>
+          </div>
+          <svg class="slot-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <svg class="slot-check" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="slot" id="slot-5">
+          <input type="file" id="file-5" accept="video/*" onchange="handleVideoFile(5,event)">
+          <div class="slot-number">5</div>
+          <div class="slot-content">
+            <div class="slot-title" id="slot-title-5">Vídeo 5 · opcional</div>
+            <div class="slot-subtitle" id="slot-sub-5">Toca para seleccionar</div>
+          </div>
+          <svg class="slot-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <svg class="slot-check" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+      </div>
+
+      <!-- MÚSICA -->
+      <div class="section-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        Música de fondo
+      </div>
+
+      <div class="music-section">
+
+        <!-- 1. SUBIR MÚSICA PROPIA -->
+        <div class="music-own-block">
+          <div class="music-own-label">Sube tu propia música</div>
+          <div class="music-own-hint">MP3, WAV o M4A · se mezclará a volumen suave con tu vídeo</div>
+          <button class="music-own-btn" id="music-own-btn">
+            <input type="file" id="music-file" accept="audio/*" onchange="handleMusicFile(event)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span id="music-own-btn-text">Seleccionar archivo de audio</span>
+          </button>
+          <div class="music-own-filename" id="music-own-filename"></div>
+        </div>
+
+        <!-- Separador -->
+        <div class="music-or-sep"><span>o elige una de estas opciones</span></div>
+
+        <!-- 2. OPCIONES CLICABLES -->
+        <div class="music-choice-group">
+
+          <!-- Opción A: Música automática -->
+          <div class="music-choice" id="choice-auto" onclick="selectMusicMode('auto')">
+            <div class="music-choice-header">
+              <div class="mradio"><div class="mradio-dot"></div></div>
+              <div class="music-choice-texts">
+                <div class="music-choice-title">Música automática · libre de derechos</div>
+                <div class="music-choice-desc">Elige el estilo y nosotros ponemos la música</div>
+              </div>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2" id="arrow-auto" style="transition:transform 0.25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <!-- Lista de géneros -->
+            <div class="genre-panel" id="genre-panel">
+              <div class="genre-panel-label">Elige el estilo musical</div>
+              <div class="genre-group">
+                <div class="genre-group-title">Amor y pareja</div>
+                <div class="genre-list">
+                  <div class="genre-item" id="gi-romantica" onclick="selectGenre(event,'romantica')"><span>Romántica · piano suave y cuerdas</span><svg class="genre-item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  <div class="genre-item" id="gi-boda" onclick="selectGenre(event,'boda')"><span>Boda · emotiva y atemporal</span><svg class="genre-item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  <div class="genre-item" id="gi-aniversario" onclick="selectGenre(event,'aniversario')"><span>Aniversario · nostálgica y cálida</span><svg class="genre-item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                </div>
+              </div>
+              <div class="genre-group">
+                <div class="genre-group-title">Familia</div>
+                <div class="genre-list">
+                  <div class="genre-item" id="gi-bebe" onclick="selectGenre(event,'bebe')"><span>Bebé y primer año · ternura pura</span><svg class="genre-item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  <div class="genre-item" id="gi-infantil" onclick="selectGenre(event,'infantil')"><span>Infantil · alegre y juguetona</span><svg class="genre-item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  <div class="genre-item" id="gi-familiar" onclick="selectGenre(event,'familiar')"><span>Familiar · folk acústico y cálido</span><svg class="genre-item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  <div class="genre-item" id="gi-mascota" onclick="selectGenre(event,'mascota')"><span>Mascotas · dulce y traviesa</span><svg class="genre-item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                </div>
+              </div>
+              <div class="genre-group">
+                <div class="genre-group-title">Celebraciones</div>
+                <div class="genre-list">
+                  <div class="genre-item" id="gi-cumpleanos" onclick="selectGenre(event,'cumpleanos')"><span>Cumpleaños · festiva y animada</span><svg class="genre-item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  <div class="genre-item" id="gi-graduacion" onclick="selectGenre(event,'graduacion')"><span>Graduación · emotiva e inspiradora</span><svg class="genre-item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  <div class="genre-item" id="gi-comunion" onclick="selectGenre(event,'comunion')"><span>Comunión · serena y ceremoniosa</span><svg class="genre-item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                </div>
+              </div>
+              <div class="genre-group">
+                <div class="genre-group-title">Viajes y aventuras</div>
+                <div class="genre-list">
+                  <div class="genre-item" id="gi-viaje" onclick="selectGenre(event,'viaje')"><span>Viaje · world music y ritmo</span><svg class="genre-item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  <div class="genre-item" id="gi-aventura" onclick="selectGenre(event,'aventura')"><span>Aventura · épica y vibrante</span><svg class="genre-item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  <div class="genre-item" id="gi-verano" onclick="selectGenre(event,'verano')"><span>Verano · pop acústico relajado</span><svg class="genre-item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                </div>
+              </div>
+              <div class="genre-group">
+                <div class="genre-group-title">Proyectos</div>
+                <div class="genre-list">
+                  <div class="genre-item" id="gi-reforma" onclick="selectGenre(event,'reforma')"><span>Reforma del hogar · dinámica y moderna</span><svg class="genre-item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  <div class="genre-item" id="gi-cinematica" onclick="selectGenre(event,'cinematica')"><span>Cinematográfica · orquestal y dramática</span><svg class="genre-item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  <div class="genre-item" id="gi-corporativa" onclick="selectGenre(event,'corporativa')"><span>Corporativa · limpia y profesional</span><svg class="genre-item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                </div>
+              </div>
+            </div><!-- /genre-panel -->
+          </div><!-- /choice-auto -->
+
+          <!-- Opción B: Sin música -->
+          <div class="music-choice selected" id="choice-none" onclick="selectMusicMode('none')">
+            <div class="music-choice-header">
+              <div class="mradio"><div class="mradio-dot"></div></div>
+              <div class="music-choice-texts">
+                <div class="music-choice-title">Sin música de fondo</div>
+                <div class="music-choice-desc">Solo el audio original de tus vídeos</div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /music-choice-group -->
+
+      </div><!-- /music-section -->
+
+      <!-- INFO -->
+      <div class="info-box">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>Mínimo 2 vídeos. Procesado en ~2-3 minutos. La música se mezcla al 30% del volumen para que se escuche el audio original.</span>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="progress-area" id="progress-area">
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progress-bar"></div>
+        </div>
+        <div class="progress-text" id="progress-text">Preparando...</div>
+      </div>
+
+      <!-- RESULT -->
+      <div class="result-area" id="result-area">
+        <div class="result-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#7db898" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="result-title">¡Tu vídeo está listo!</div>
+        <div class="result-subtitle">Clips unidos con la música seleccionada</div>
+        <a class="btn-download" id="download-btn" href="#" download="bookeo-video.mp4">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar vídeo
+        </a>
+        <button class="btn-new" onclick="resetModal()">Crear otro vídeo</button>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="modal-actions" id="modal-actions">
+        <a href="bookeo_creador.html" class="btn-secondary" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">← Volver al álbum</a>
+        <button class="btn-primary" id="btn-process" onclick="processVideos()" disabled>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Crear vídeo
+        </button>
+      </div>
+
+    </div><!-- /modal-body -->
+  </div><!-- /modal -->
+
+
+<script>
+  // ── STATE ──
+  const videoFiles = {};
+  let musicFile = null;
+  let musicMode = 'none'; // 'none' | 'upload' | 'auto'
+  let selectedGenre = '';
+
+  const genreDescriptions = {
+    romantica:   'Piano suave y cuerdas · perfecta para momentos de pareja',
+    boda:        'Música emotiva y atemporal · ideal para bodas y compromisos',
+    aniversario: 'Notas cálidas y nostálgicas · para celebrar años juntos',
+    bebe:        'Melodías de cuna y ternura · primer año de vida',
+    infantil:    'Ritmos alegres y juguetones · para los más pequeños',
+    familiar:    'Folk acústico y cálido · momentos en familia',
+    mascota:     'Melodía dulce y traviesa · para tus animales favoritos',
+    cumpleanos:  'Festiva y animada · para celebraciones y fiestas',
+    graduacion:  'Emotiva e inspiradora · logros que merecen recordarse',
+    comunion:    'Serena y ceremoniosa · día especial y solemne',
+    viaje:       'World music con ritmo · aventuras por el mundo',
+    aventura:    'Épica y vibrante · naturaleza y adrenalina',
+    verano:      'Pop acústico relajado · playa, sol y risas',
+    reforma:     'Dinámica y moderna · proyectos del hogar',
+    cinematica:  'Orquestal y dramática · momentos épicos',
+    corporativa: 'Limpia y profesional · proyectos de empresa',
+  };
+
+  // ── VIDEO FILES ──
+  function handleVideoFile(n, e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    videoFiles[n] = file;
+    const slot = document.getElementById(`slot-${n}`);
+    slot.classList.add('has-file');
+    document.getElementById(`slot-title-${n}`).textContent = truncate(file.name, 28);
+    document.getElementById(`slot-sub-${n}`).textContent = formatSize(file.size);
+    updateProcessButton();
+  }
+
+  // ── MUSIC FILE (audio propio) ──
+  function handleMusicFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    musicFile = file;
+    musicMode = 'upload';
+
+    // Deselect opciones
+    document.getElementById('choice-none').classList.remove('selected');
+    document.getElementById('choice-auto').classList.remove('selected');
+    document.getElementById('genre-panel').classList.remove('visible');
+    document.getElementById('arrow-auto').style.transform = '';
+
+    // Actualizar botón
+    const btn = document.getElementById('music-own-btn');
+    btn.classList.add('has-file');
+    document.getElementById('music-own-btn-text').textContent = '✓ ' + truncate(file.name, 26);
+    const fn = document.getElementById('music-own-filename');
+    fn.textContent = formatSize(file.size) + ' · tu música personal';
+    fn.classList.add('visible');
+  }
+
+  // ── MUSIC MODE (opciones radio) ──
+  function selectMusicMode(mode) {
+    musicMode = mode;
+
+    // Reset archivo propio si cambia
+    if (mode !== 'upload') {
+      musicFile = null;
+      document.getElementById('music-file').value = '';
+      document.getElementById('music-own-btn').classList.remove('has-file');
+      document.getElementById('music-own-btn-text').textContent = 'Seleccionar archivo de audio';
+      document.getElementById('music-own-filename').classList.remove('visible');
+    }
+
+    // Actualizar estilos opciones
+    document.getElementById('choice-none').classList.toggle('selected', mode === 'none');
+    document.getElementById('choice-auto').classList.toggle('selected', mode === 'auto');
+
+    // Mostrar/ocultar panel de géneros
+    const panel = document.getElementById('genre-panel');
+    const arrow = document.getElementById('arrow-auto');
+    if (mode === 'auto') {
+      panel.classList.add('visible');
+      arrow.style.transform = 'rotate(180deg)';
+    } else {
+      panel.classList.remove('visible');
+      arrow.style.transform = '';
+      selectedGenre = '';
+      document.querySelectorAll('.genre-item').forEach(el => el.classList.remove('selected'));
+    }
+  }
+
+  // ── GÉNERO ──
+  function selectGenre(e, genre) {
+    e.stopPropagation(); // no disparar selectMusicMode
+    selectedGenre = genre;
+    document.querySelectorAll('.genre-item').forEach(el => el.classList.remove('selected'));
+    const el = document.getElementById('gi-' + genre);
+    if (el) el.classList.add('selected');
+  }
+
+  // ── HELPERS ──
+  function truncate(str, max) { return str.length > max ? str.substring(0, max) + '…' : str; }
+  function formatSize(bytes) {
+    if (bytes < 1024*1024) return (bytes/1024).toFixed(0) + ' KB';
+    return (bytes/(1024*1024)).toFixed(1) + ' MB';
+  }
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  function updateProcessButton() {
+    const count = Object.keys(videoFiles).length;
+    const btn = document.getElementById('btn-process');
+    btn.disabled = count < 2;
+    if (count >= 2) {
+      btn.innerHTML = `
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Crear vídeo · ${count} clip${count > 1 ? 's' : ''}
+      `;
+    }
+  }
+
+  // ── PROCESS ──
+  async function processVideos() {
+    const count = Object.keys(videoFiles).length;
+    if (count < 2) return;
+
+    // processing started
+    const progressArea = document.getElementById('progress-area');
+    progressArea.classList.add('visible');
+
+    const hasMusicUpload = musicMode === 'upload' && musicFile;
+    const hasMusicAuto   = musicMode === 'auto' && selectedGenre;
+
+    const steps = [
+      { text: 'Subiendo vídeos al servidor...', pct: 15 },
+      { text: 'Analizando clips...', pct: 30 },
+      { text: 'Uniendo vídeos...', pct: 55 },
+      { text: hasMusicUpload ? 'Mezclando tu música...' : hasMusicAuto ? `Añadiendo música · ${selectedGenre}...` : 'Procesando audio...', pct: 75 },
+      { text: 'Exportando vídeo final...', pct: 92 },
+      { text: '¡Listo!', pct: 100 },
+    ];
+
+    const bar = document.getElementById('progress-bar');
+    const txt = document.getElementById('progress-text');
+
+    // Construir FormData
+    const formData = new FormData();
+    const sortedKeys = Object.keys(videoFiles).sort();
+    sortedKeys.forEach(n => formData.append(`video_${n}`, videoFiles[n]));
+
+    if (hasMusicUpload)  formData.append('music_file', musicFile);
+    if (hasMusicAuto)    formData.append('music_genre', selectedGenre);
+
+    // Progreso visual
+    let stepIdx = 0;
+    const progressInterval = setInterval(() => {
+      if (stepIdx < steps.length - 1) {
+        bar.style.width = steps[stepIdx].pct + '%';
+        txt.textContent = steps[stepIdx].text;
+        stepIdx++;
+      }
+    }, 2500);
+
+    try {
+      // ⚠️ CAMBIA ESTA URL por tu endpoint de Railway
+      const BACKEND_URL = 'https://TU-APP.railway.app/merge';
+
+      const response = await fetch(BACKEND_URL, { method: 'POST', body: formData });
+      clearInterval(progressInterval);
+      if (!response.ok) throw new Error('Error servidor');
+
+      bar.style.width = '100%';
+      txt.textContent = '¡Listo!';
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      await sleep(500);
+
+      progressArea.classList.remove('visible');
+      document.getElementById('result-area').classList.add('visible');
+      document.getElementById('download-btn').href = url;
+
+    } catch (err) {
+      clearInterval(progressInterval);
+      bar.style.background = '#e57373';
+      txt.textContent = 'Error al procesar. Inténtalo de nuevo.';
+      setTimeout(resetModal, 3000);
+    }
+  }
+
+  // ── RESET ──
+  function resetModal() {
+    Object.keys(videoFiles).forEach(k => delete videoFiles[k]);
+    musicFile = null; musicMode = 'none'; selectedGenre = '';
+
+    for (let i = 1; i <= 5; i++) {
+      document.getElementById(`slot-${i}`).classList.remove('has-file');
+      document.getElementById(`slot-title-${i}`).textContent = `Vídeo ${i}${i === 1 ? ' · primer clip' : i >= 4 ? ' · opcional' : ''}`;
+      document.getElementById(`slot-sub-${i}`).textContent = 'Toca para seleccionar';
+      document.getElementById(`file-${i}`).value = '';
+    }
+
+    document.getElementById('music-file').value = '';
+    document.getElementById('music-own-btn').classList.remove('has-file');
+    document.getElementById('music-own-btn-text').textContent = 'Seleccionar archivo de audio';
+    document.getElementById('music-own-filename').classList.remove('visible');
+    document.getElementById('choice-none').classList.add('selected');
+    document.getElementById('choice-auto').classList.remove('selected');
+    document.getElementById('genre-panel').classList.remove('visible');
+    document.getElementById('arrow-auto').style.transform = '';
+    document.querySelectorAll('.genre-item').forEach(el => el.classList.remove('selected'));
+
+    document.getElementById('progress-area').classList.remove('visible');
+    document.getElementById('progress-bar').style.width = '0%';
+    document.getElementById('progress-bar').style.background = '';
+    document.getElementById('result-area').classList.remove('visible');
+    document.getElementById('modal-actions').style.display = '';
+    document.getElementById('btn-process').disabled = true;
+    document.getElementById('btn-process').innerHTML = `
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Crear vídeo
+    `;
+  }
+</script>
+</body>
+</html>
